@@ -70,12 +70,20 @@ class MedicalDevicesServiceProvider extends ServiceProvider
 
         $this->registerLivewireComponents();
 
-        // Read-back: Messwerte-Panel an die Patienten-Akte andocken (wenn patient-Modul da ist).
+        // Read-back: Messwerte-Panel an die patient-Akte andocken (wenn patient-Modul da ist).
         try {
             resolve(\Platform\Patient\Services\PatientPanelRegistry::class)
                 ->register(new \Platform\MedicalDevices\Patient\CoreObservationsPanel());
         } catch (\Throwable $e) {
             // patient-Modul nicht verfügbar — ignorieren.
+        }
+
+        // Read-back: Messwerte in den encounter-Akte-Verlauf einspeisen (wenn encounter da ist).
+        try {
+            resolve(\Platform\Encounter\Services\JournalRegistry::class)
+                ->register(new \Platform\MedicalDevices\Journal\CoreObservationsJournalProvider());
+        } catch (\Throwable $e) {
+            // encounter-Modul nicht verfügbar — ignorieren.
         }
     }
 
