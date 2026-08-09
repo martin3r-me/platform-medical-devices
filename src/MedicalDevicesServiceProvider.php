@@ -69,6 +69,14 @@ class MedicalDevicesServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'medical-devices');
 
         $this->registerLivewireComponents();
+
+        // Read-back: Messwerte-Panel an die Patienten-Akte andocken (wenn patient-Modul da ist).
+        try {
+            resolve(\Platform\Patient\Services\PatientPanelRegistry::class)
+                ->register(new \Platform\MedicalDevices\Patient\CoreObservationsPanel());
+        } catch (\Throwable $e) {
+            // patient-Modul nicht verfügbar — ignorieren.
+        }
     }
 
     /** Datei src/Livewire/Inbox/Index.php -> alias medical-devices.inbox.index */

@@ -87,6 +87,31 @@ class CoreObservationClient
         ];
     }
 
+    /**
+     * Liest die patient-owned Observations eines Subjects aus dem Core zurück (Read-back).
+     * Kurzer Timeout — läuft im Seiten-Render der Akte. Fehler/Timeout → leere Liste.
+     *
+     * @return array<int,array>
+     */
+    public function observationsForSubject(?string $subjectUuid): array
+    {
+        if (!$this->isConfigured() || !$subjectUuid) {
+            return [];
+        }
+        try {
+            $res = Http::withToken($this->token)
+                ->timeout(min($this->timeout, 4))
+                ->acceptJson()
+                ->get(rtrim($this->base, '/') . '/api/observation', ['subject_uuid' => $subjectUuid]);
+        } catch (\Throwable $e) {
+            return [];
+        }
+        if (!$res->successful()) {
+            return [];
+        }
+        return (array) ($res->json('observations') ?? []);
+    }
+
     /** Geparste GDT-Komponenten → Core-Komponenten (Wert numerisch wenn möglich). */
     protected function components(DeviceReading $reading): array
     {
