@@ -142,9 +142,17 @@ class Index extends Component
                 $name = trim(($p->last_name ?? '') . ', ' . ($p->first_name ?? ''), ', ');
                 return [$p->id => [
                     'name' => $name !== '' ? $name : ('Patient #' . $p->id),
-                    'url'  => route('patient.patients.show', $p->id),
+                    'url'  => $this->akteUrl($p->id),
                 ]];
             })->all();
+    }
+
+    /** Absprung in die Akte: bevorzugt die encounter-Akte (Verlauf), sonst die patient-Seite. */
+    protected function akteUrl(int $patientId): string
+    {
+        return \Illuminate\Support\Facades\Route::has('encounter.akte.show')
+            ? route('encounter.akte.show', $patientId)
+            : route('patient.patients.show', $patientId);
     }
 
     public function render()
