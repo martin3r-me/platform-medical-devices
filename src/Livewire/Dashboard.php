@@ -25,6 +25,6 @@ class Dashboard extends Component
             'pending'       => $pending,
             'forwarded'     => $forwarded,
             'coreConfigured' => app(CoreObservationClient::class)->isConfigured(),
-        ]);
+        ])->layout('platform::layouts.app');
     }
 }

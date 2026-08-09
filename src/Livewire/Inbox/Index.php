@@ -118,6 +118,6 @@ class Index extends Component
         return view('medical-devices::livewire.inbox.index', [
             'pending' => $pending,
             'recent'  => $recent,
-        ]);
+        ])->layout('platform::layouts.app');
     }
 }

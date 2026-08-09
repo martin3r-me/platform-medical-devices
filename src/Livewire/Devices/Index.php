@@ -79,6 +79,6 @@ class Index extends Component
 
         return view('medical-devices::livewire.devices.index', [
             'devices' => $devices,
-        ]);
+        ])->layout('platform::layouts.app');
     }
 }
