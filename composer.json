@@ -1,0 +1,27 @@
+{
+    "name": "martin3r/platform-medical-devices",
+    "description": "Medizinische Messgeräte — Geräte-Registry, GDT-Eingang, Matching/Strip und Weiterleitung patient-owned an den sovra-Core.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Platform Team",
+            "email": "team@platform.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Platform\\MedicalDevices\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Platform\\MedicalDevices\\MedicalDevicesServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
