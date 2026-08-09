@@ -17,6 +17,12 @@ class Index extends Component
     public ?string $plainToken = null;
     public ?string $plainTokenDevice = null;
 
+    /** Inline-Bearbeitung */
+    public ?int $editingId = null;
+    public string $editName = '';
+    public string $editKind = '';
+    public string $editDef = '';
+
     protected function rules(): array
     {
         return [
@@ -65,6 +71,47 @@ class Index extends Component
             $device->status = $device->isActive() ? 'disabled' : 'active';
             $device->save();
         }
+    }
+
+    public function startEdit(int $id): void
+    {
+        $d = $this->find($id);
+        if (!$d) {
+            return;
+        }
+        $this->editingId = $d->id;
+        $this->editName  = (string) $d->name;
+        $this->editKind  = (string) $d->kind;
+        $this->editDef   = (string) $d->definition_code;
+    }
+
+    public function cancelEdit(): void
+    {
+        $this->reset(['editingId', 'editName', 'editKind', 'editDef']);
+    }
+
+    public function saveEdit(): void
+    {
+        $d = $this->editingId ? $this->find((int) $this->editingId) : null;
+        if (!$d) {
+            return;
+        }
+        $this->validate([
+            'editName' => 'required|string|max:191',
+            'editKind' => 'nullable|string|max:64',
+            'editDef'  => 'nullable|string|max:64',
+        ]);
+        $d->update([
+            'name'            => $this->editName,
+            'kind'            => $this->editKind ?: null,
+            'definition_code' => $this->editDef ?: null,
+        ]);
+        $this->cancelEdit();
+    }
+
+    public function delete(int $id): void
+    {
+        $this->find($id)?->delete();
     }
 
     protected function find(int $id): ?MedicalDevice

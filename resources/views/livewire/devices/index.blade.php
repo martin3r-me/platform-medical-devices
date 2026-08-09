@@ -70,10 +70,27 @@
                                         <x-nx-badge :variant="$d->isActive() ? 'success' : 'neutral'" dot>{{ $d->isActive() ? 'aktiv' : 'deaktiviert' }}</x-nx-badge>
                                     </td>
                                     <td class="px-3 py-2 text-right whitespace-nowrap">
+                                        <x-nx-button variant="ghost" size="sm" wire:click="startEdit({{ $d->id }})">Bearbeiten</x-nx-button>
                                         <x-nx-button variant="ghost" size="sm" wire:click="rotate({{ $d->id }})">Token neu</x-nx-button>
                                         <x-nx-button variant="ghost" size="sm" wire:click="toggle({{ $d->id }})">{{ $d->isActive() ? 'deaktivieren' : 'aktivieren' }}</x-nx-button>
+                                        <x-nx-button variant="danger" size="sm" wire:click="delete({{ $d->id }})" wire:confirm="Gerät wirklich löschen?">Löschen</x-nx-button>
                                     </td>
                                 </tr>
+                                @if ($editingId == $d->id)
+                                <tr class="border-t border-[color:var(--nx-line)] bg-[color:var(--nx-hover)]">
+                                    <td colspan="7" class="px-3 py-3">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <x-nx-input-text label="Name" wire:model="editName" errorKey="editName" />
+                                            <x-nx-input-text label="Gattung (kind)" wire:model="editKind" />
+                                            <x-nx-input-text label="Core-Definition (LOINC/Code)" placeholder="audiometry.puretone" wire:model="editDef" />
+                                        </div>
+                                        <div class="mt-3 flex gap-2">
+                                            <x-nx-button variant="primary" size="sm" wire:click="saveEdit">Speichern</x-nx-button>
+                                            <x-nx-button variant="ghost" size="sm" wire:click="cancelEdit">Abbrechen</x-nx-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endif
                             @endforeach
                         </tbody>
                     </table>
