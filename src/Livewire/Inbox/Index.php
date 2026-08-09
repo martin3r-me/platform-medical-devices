@@ -8,8 +8,8 @@ use Platform\MedicalDevices\Services\CoreObservationClient;
 
 class Index extends Component
 {
-    /** Manuelles Matching: [readingId => lab_number] */
-    public array $manualNumber = [];
+    /** Manuelles Matching: [readingId => patient_id] */
+    public array $manualPatient = [];
 
     public ?string $flash = null;
     public ?string $flashType = null;
@@ -46,24 +46,23 @@ class Index extends Component
         $this->setFlash('Messung patient-owned an den Core übergeben.', 'success');
     }
 
-    /** Manuell einem Patienten zuordnen (per lab_number). */
+    /** Manuell einem Patienten zuordnen (per Dropdown-Auswahl). */
     public function assign(int $id): void
     {
         $reading = $this->find($id);
         if (!$reading) {
             return;
         }
-        $number = trim((string) ($this->manualNumber[$id] ?? ''));
-        $patient = $this->findPatient($reading->team_id, $number);
+        $patientId = (int) ($this->manualPatient[$id] ?? 0);
+        $patient = $this->findPatientById($reading->team_id, $patientId);
 
         if (!$patient) {
-            $this->setFlash('Kein Patient mit dieser Nummer gefunden.', 'error');
+            $this->setFlash('Bitte einen Patienten wählen.', 'error');
             return;
         }
 
         $reading->update([
             'matched_patient_id' => $patient->id,
-            'patient_number'     => $number,
             'status'             => DeviceReading::S_MATCHED,
         ]);
         $this->setFlash('Zugeordnet.', 'success');
@@ -89,16 +88,33 @@ class Index extends Component
         return DeviceReading::where('team_id', auth()->user()?->currentTeam?->id)->find($id);
     }
 
-    protected function findPatient(int $teamId, string $number)
+    protected function findPatientById(int $teamId, int $id)
     {
-        if ($number === '') {
+        if ($id <= 0) {
             return null;
         }
         $cls = '\Platform\Patient\Models\Patient';
         if (!class_exists($cls)) {
             return null;
         }
-        return $cls::where('team_id', $teamId)->where('lab_number', $number)->first();
+        return $cls::where('team_id', $teamId)->find($id);
+    }
+
+    /** Patienten des Teams als Dropdown-Optionen [['value'=>id,'label'=>…], …]. */
+    protected function patientOptions(int $teamId): array
+    {
+        $cls = '\Platform\Patient\Models\Patient';
+        if (!class_exists($cls)) {
+            return [];
+        }
+        return $cls::where('team_id', $teamId)
+            ->orderBy('last_name')->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name', 'birth_date'])
+            ->map(function ($p) {
+                $name = trim(($p->last_name ?? '') . ', ' . ($p->first_name ?? ''), ', ');
+                $dob  = $p->birth_date ? ' (' . \Illuminate\Support\Carbon::parse($p->birth_date)->format('d.m.Y') . ')' : '';
+                return ['value' => $p->id, 'label' => ($name !== '' ? $name : 'Patient #' . $p->id) . $dob];
+            })->all();
     }
 
     public function render()
@@ -116,8 +132,9 @@ class Index extends Component
             ->orderByDesc('id')->limit(20)->get();
 
         return view('medical-devices::livewire.inbox.index', [
-            'pending' => $pending,
-            'recent'  => $recent,
+            'pending'        => $pending,
+            'recent'         => $recent,
+            'patientOptions' => $this->patientOptions((int) $teamId),
         ])->layout('platform::layouts.app');
     }
 }

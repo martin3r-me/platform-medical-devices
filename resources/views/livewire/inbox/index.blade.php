@@ -52,7 +52,7 @@
                                         <x-nx-button variant="primary" size="sm" wire:click="confirm({{ $r->id }})">Bestätigen &amp; an Core</x-nx-button>
                                     @else
                                         <div class="flex items-end gap-1">
-                                            <x-nx-input-text size="sm" placeholder="Patient-Nr." wire:model="manualNumber.{{ $r->id }}" class="w-28" />
+                                            <x-nx-input-select size="sm" :options="$patientOptions" nullable nullLabel="— Patient wählen —" wire:model="manualPatient.{{ $r->id }}" class="w-56" />
                                             <x-nx-button size="sm" wire:click="assign({{ $r->id }})">Zuordnen</x-nx-button>
                                         </div>
                                     @endif
