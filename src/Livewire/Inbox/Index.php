@@ -11,6 +11,9 @@ class Index extends Component
     /** Manuelles Matching: [readingId => patient_id] */
     public array $manualPatient = [];
 
+    /** Rohdaten (GDT) je Reading ein-/ausklappen: [readingId => bool] */
+    public array $showRaw = [];
+
     public ?string $flash = null;
     public ?string $flashType = null;
 
@@ -75,6 +78,11 @@ class Index extends Component
             $reading->stripPii();
             $reading->update(['status' => DeviceReading::S_REJECTED]);
         }
+    }
+
+    public function toggleRaw(int $id): void
+    {
+        $this->showRaw[$id] = !($this->showRaw[$id] ?? false);
     }
 
     protected function setFlash(string $msg, string $type): void

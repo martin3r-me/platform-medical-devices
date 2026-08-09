@@ -47,6 +47,12 @@
                                             </x-nx-badge>
                                         @endforeach
                                     </div>
+                                    <div class="mt-2">
+                                        <x-nx-button variant="ghost" size="sm" wire:click="toggleRaw({{ $r->id }})">{{ ($showRaw[$r->id] ?? false) ? 'Rohdaten ausblenden' : 'Rohdaten (GDT)' }}</x-nx-button>
+                                        @if ($showRaw[$r->id] ?? false)
+                                            <pre class="mt-1 text-xs bg-[color:var(--nx-hover)] rounded-md p-2 overflow-x-auto whitespace-pre-wrap">{{ $r->raw }}</pre>
+                                        @endif
+                                    </div>
                                     @if ($r->note)
                                         <div class="text-xs text-[color:var(--nx-danger)] mt-2">{{ $r->note }}</div>
                                     @endif
