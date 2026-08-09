@@ -30,7 +30,11 @@
                                     </div>
                                     <div class="text-sm text-[color:var(--nx-muted)] mt-1">
                                         @if ($r->matched_patient_id)
-                                            <x-nx-badge variant="success" dot>{{ $r->patient_name ?? ('Patient #'.$r->matched_patient_id) }}</x-nx-badge>
+                                            @php $mp = $matched[$r->matched_patient_id] ?? null; @endphp
+                                            <x-nx-badge variant="success" dot>{{ $mp['name'] ?? ('Patient #'.$r->matched_patient_id) }}</x-nx-badge>
+                                            @if ($mp)
+                                                <a href="{{ $mp['url'] }}" class="text-xs text-[color:var(--nx-accent,#0B6E5B)] hover:underline ml-1">→ Akte</a>
+                                            @endif
                                         @else
                                             <x-nx-badge variant="warning" dot>Nicht zugeordnet</x-nx-badge>
                                             @if ($r->patient_number) <span class="font-mono text-xs ml-1">Nr. {{ $r->patient_number }}</span> @endif
@@ -75,6 +79,7 @@
                         <thead>
                             <tr class="text-left text-[color:var(--nx-faint)] uppercase text-xs">
                                 <th class="px-3 py-2">Gerät</th>
+                                <th class="px-3 py-2">Patient</th>
                                 <th class="px-3 py-2">Zeitpunkt</th>
                                 <th class="px-3 py-2">Status</th>
                                 <th class="px-3 py-2">Core-Referenz</th>
@@ -84,6 +89,12 @@
                             @foreach ($recent as $r)
                                 <tr class="border-t border-[color:var(--nx-line)]">
                                     <td class="px-3 py-2">{{ $r->device?->name ?? '—' }}</td>
+                                    <td class="px-3 py-2">
+                                        @php $mp = $matched[$r->matched_patient_id] ?? null; @endphp
+                                        @if ($mp)
+                                            <a href="{{ $mp['url'] }}" class="text-[color:var(--nx-accent,#0B6E5B)] hover:underline">{{ $mp['name'] }}</a>
+                                        @else — @endif
+                                    </td>
                                     <td class="px-3 py-2 text-[color:var(--nx-muted)] whitespace-nowrap">{{ $r->measured_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                     <td class="px-3 py-2">
                                         @if ($r->isForwarded())

@@ -117,6 +117,28 @@ class Index extends Component
             })->all();
     }
 
+    /** Zugeordnete Patienten (Name + Akte-Link) für die Anzeige/den Absprung. */
+    protected function patientMap(int $teamId, array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter($ids)));
+        if (empty($ids)) {
+            return [];
+        }
+        $cls = '\Platform\Patient\Models\Patient';
+        if (!class_exists($cls)) {
+            return [];
+        }
+        return $cls::where('team_id', $teamId)->whereIn('id', $ids)
+            ->get(['id', 'first_name', 'last_name'])
+            ->mapWithKeys(function ($p) {
+                $name = trim(($p->last_name ?? '') . ', ' . ($p->first_name ?? ''), ', ');
+                return [$p->id => [
+                    'name' => $name !== '' ? $name : ('Patient #' . $p->id),
+                    'url'  => route('patient.patients.show', $p->id),
+                ]];
+            })->all();
+    }
+
     public function render()
     {
         $teamId = auth()->user()?->currentTeam?->id;
@@ -131,10 +153,16 @@ class Index extends Component
             ->whereIn('status', [DeviceReading::S_FORWARDED, DeviceReading::S_REJECTED])
             ->orderByDesc('id')->limit(20)->get();
 
+        $matched = $this->patientMap(
+            (int) $teamId,
+            $pending->pluck('matched_patient_id')->merge($recent->pluck('matched_patient_id'))->all()
+        );
+
         return view('medical-devices::livewire.inbox.index', [
             'pending'        => $pending,
             'recent'         => $recent,
             'patientOptions' => $this->patientOptions((int) $teamId),
+            'matched'        => $matched,
         ])->layout('platform::layouts.app');
     }
 }
