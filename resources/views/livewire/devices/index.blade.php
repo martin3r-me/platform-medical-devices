@@ -13,7 +13,8 @@
     <x-ui-page-container width="contained" spacing="space-y-6">
 
         @if ($plainToken)
-            <x-nx-callout variant="success" title="Token für „{{ $plainTokenDevice }}" — jetzt kopieren, wird nur einmal angezeigt">
+            <x-nx-callout variant="success" title="Neuer Geräte-Token — jetzt kopieren, wird nur einmal angezeigt">
+                <div class="text-sm mb-1">Für <strong>{{ $plainTokenDevice }}</strong>:</div>
                 <div class="font-mono text-sm bg-[color:var(--nx-hover)] rounded-md p-3 break-all select-all mt-1">{{ $plainToken }}</div>
                 <div class="text-xs text-[color:var(--nx-muted)] mt-2">Im Windows-Agent je Geräte-Ordner hinterlegen. Bei Verlust: neu ausstellen (rotieren).</div>
             </x-nx-callout>
