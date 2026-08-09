@@ -112,6 +112,39 @@ class CoreObservationClient
         return (array) ($res->json('observations') ?? []);
     }
 
+    /**
+     * Kuratierte Definitionen aus dem Core (für das Geräte-Dropdown). 5-Min-Cache,
+     * aber Leerlisten werden NICHT gecacht (falls der Core kurz weg war).
+     *
+     * @return array<int,array{code:string,name:?string,loinc:?string}>
+     */
+    public function definitions(): array
+    {
+        if (!$this->isConfigured()) {
+            return [];
+        }
+        $cache = \Illuminate\Support\Facades\Cache::get('medical-devices:core-definitions');
+        if (is_array($cache) && $cache) {
+            return $cache;
+        }
+        try {
+            $res = Http::withToken($this->token)
+                ->timeout(min($this->timeout, 4))
+                ->acceptJson()
+                ->get(rtrim($this->base, '/') . '/api/observation/definitions');
+        } catch (\Throwable $e) {
+            return [];
+        }
+        if (!$res->successful()) {
+            return [];
+        }
+        $list = (array) ($res->json('definitions') ?? []);
+        if ($list) {
+            \Illuminate\Support\Facades\Cache::put('medical-devices:core-definitions', $list, 300);
+        }
+        return $list;
+    }
+
     /** Geparste GDT-Komponenten → Core-Komponenten (Wert numerisch wenn möglich). */
     protected function components(DeviceReading $reading): array
     {

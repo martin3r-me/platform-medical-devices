@@ -4,6 +4,7 @@ namespace Platform\MedicalDevices\Livewire\Devices;
 
 use Livewire\Component;
 use Platform\MedicalDevices\Models\MedicalDevice;
+use Platform\MedicalDevices\Services\CoreObservationClient;
 
 class Index extends Component
 {
@@ -124,8 +125,15 @@ class Index extends Component
         $devices = MedicalDevice::where('team_id', auth()->user()?->currentTeam?->id)
             ->orderBy('name')->get();
 
+        $definitions = app(CoreObservationClient::class)->definitions();
+        $definitionOptions = array_map(fn ($d) => [
+            'value' => $d['code'] ?? '',
+            'label' => ($d['name'] ?? $d['code'] ?? '') . ' (' . ($d['code'] ?? '') . ')',
+        ], $definitions);
+
         return view('medical-devices::livewire.devices.index', [
-            'devices' => $devices,
+            'devices'           => $devices,
+            'definitionOptions' => $definitionOptions,
         ])->layout('platform::layouts.app');
     }
 }

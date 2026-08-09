@@ -26,7 +26,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <x-nx-input-text label="Name" placeholder="Audiometer Raum 2" wire:model="name" errorKey="name" required />
                     <x-nx-input-text label="Gattung (kind)" placeholder="audiometry" wire:model="kind" errorKey="kind" />
-                    <x-nx-input-text label="Core-Definition (LOINC/Code)" placeholder="z.B. 28615-3" wire:model="definition_code" errorKey="definition_code" />
+                    @if (!empty($definitionOptions))
+                        <x-nx-input-select label="Core-Definition (Messtyp)" :options="$definitionOptions" nullable nullLabel="— Messtyp wählen —" wire:model="definition_code" errorKey="definition_code" />
+                    @else
+                        <x-nx-input-text label="Core-Definition (LOINC/Code)" placeholder="z.B. audiometry.puretone" hint="Core nicht erreichbar — Code manuell" wire:model="definition_code" errorKey="definition_code" />
+                    @endif
                     <div class="grid grid-cols-2 gap-3">
                         <x-nx-input-text label="Hersteller" wire:model="manufacturer" />
                         <x-nx-input-text label="Modell" wire:model="model" />
@@ -82,7 +86,11 @@
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             <x-nx-input-text label="Name" wire:model="editName" errorKey="editName" />
                                             <x-nx-input-text label="Gattung (kind)" wire:model="editKind" />
-                                            <x-nx-input-text label="Core-Definition (LOINC/Code)" placeholder="audiometry.puretone" wire:model="editDef" />
+                                            @if (!empty($definitionOptions))
+                                                <x-nx-input-select label="Core-Definition (Messtyp)" :options="$definitionOptions" nullable nullLabel="— Messtyp wählen —" wire:model="editDef" />
+                                            @else
+                                                <x-nx-input-text label="Core-Definition (LOINC/Code)" placeholder="audiometry.puretone" wire:model="editDef" />
+                                            @endif
                                         </div>
                                         <div class="mt-3 flex gap-2">
                                             <x-nx-button variant="primary" size="sm" wire:click="saveEdit">Speichern</x-nx-button>
