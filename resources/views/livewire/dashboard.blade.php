@@ -10,48 +10,45 @@
         ]" />
     </x-slot>
 
-    <x-ui-page-container width="full" spacing="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <x-nx-card>
-                <div class="p-4">
-                    <div class="text-xs uppercase tracking-wide text-[color:var(--nx-faint)]">Geräte</div>
-                    <div class="text-3xl font-semibold mt-1">{{ $devices }}</div>
-                </div>
-            </x-nx-card>
-            <x-nx-card>
-                <div class="p-4">
-                    <div class="text-xs uppercase tracking-wide text-[color:var(--nx-faint)]">Im Eingang (offen)</div>
-                    <div class="text-3xl font-semibold mt-1">{{ $pending }}</div>
-                </div>
-            </x-nx-card>
-            <x-nx-card>
-                <div class="p-4">
-                    <div class="text-xs uppercase tracking-wide text-[color:var(--nx-faint)]">An Core übergeben</div>
-                    <div class="text-3xl font-semibold mt-1">{{ $forwarded }}</div>
-                </div>
-            </x-nx-card>
-        </div>
+    <x-ui-page-container width="contained" spacing="space-y-6">
+        <x-nx-stat-grid cols="3">
+            <x-nx-stat label="Geräte" :value="$devices" icon="heroicon-o-cpu-chip" :href="route('medical-devices.devices.index')" />
+            <x-nx-stat label="Im Eingang (offen)" :value="$pending" icon="heroicon-o-inbox-arrow-down" :href="route('medical-devices.inbox.index')" accent="var(--nx-warning)" />
+            <x-nx-stat label="An Core übergeben" :value="$forwarded" icon="heroicon-o-check-circle" accent="var(--nx-success)" />
+        </x-nx-stat-grid>
 
-        <x-nx-card>
-            <div class="p-4 space-y-3 text-sm text-[color:var(--nx-muted)]">
-                <div class="font-medium text-[color:var(--nx-text)]">So läuft der Strom</div>
+        @if ($coreConfigured)
+            <x-nx-callout variant="success" title="Core verbunden">Weiterleitung aktiv — bestätigte Messungen gehen patient-owned an den sovra-Core.</x-nx-callout>
+        @else
+            <x-nx-callout variant="warning" title="Core-Anbindung nicht konfiguriert">
+                <code>SOVRA_CORE_URL</code> und <code>SOVRA_CORE_TOKEN</code> setzen. Bis dahin bleiben Messungen im Eingang stehen (nichts fließt versehentlich in den Core).
+            </x-nx-callout>
+        @endif
+    </x-ui-page-container>
+
+    <x-slot name="sidebar">
+        <x-ui-page-sidebar title="Übersicht" width="w-80" :defaultOpen="true">
+            <div class="p-6 space-y-6">
                 <div>
-                    Gerät → GDT-Datei im Ordner → lokaler Windows-Agent (Geräte-Token je Ordner) →
-                    <code>POST /api/medical-devices/ingest</code> → Eingang. Hier ordnest du zu, der Arzt
-                    bestätigt, die Identität wird <strong>gestrippt</strong>, und nur der Wert geht
-                    patient-owned an den sovra-Core. Die Akte liest zurück aus dem Core.
-                </div>
-                <div>
-                    Core-Anbindung:
-                    @if ($coreConfigured)
-                        <span class="text-emerald-600 font-medium">verbunden</span> — Weiterleitung aktiv.
-                    @else
-                        <span class="text-amber-600 font-medium">nicht konfiguriert</span> —
-                        <code>SOVRA_CORE_URL</code> + <code>SOVRA_CORE_TOKEN</code> setzen. Bis dahin bleiben
-                        Messungen im Eingang stehen.
-                    @endif
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-3">So läuft der Strom</h3>
+                    <div class="text-sm text-[color:var(--nx-muted)] space-y-2">
+                        <p>Gerät → GDT-Datei im Ordner → lokaler Windows-Agent (Token je Ordner) → Eingang.</p>
+                        <p>Hier zuordnen, der Arzt bestätigt, die Identität wird <strong>gestrippt</strong>, nur der Wert geht patient-owned an den Core.</p>
+                        <p>Die Patientenakte liest zurück aus dem Core — nodera speichert den Wert nicht doppelt.</p>
+                    </div>
                 </div>
             </div>
-        </x-nx-card>
-    </x-ui-page-container>
+        </x-ui-page-sidebar>
+    </x-slot>
+
+    <x-slot name="activity">
+        <x-ui-page-sidebar title="Aktivitäten" width="w-80" :defaultOpen="false" storeKey="activityOpen" side="right">
+            <div class="p-6 space-y-6">
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-3">Letzte Aktivitäten</h3>
+                    <div class="text-sm text-[color:var(--nx-muted)]">Noch keine Aktivitäten.</div>
+                </div>
+            </div>
+        </x-ui-page-sidebar>
+    </x-slot>
 </x-ui-page>

@@ -10,14 +10,14 @@
         ]" />
     </x-slot>
 
-    <x-ui-page-container width="full" spacing="space-y-6">
+    <x-ui-page-container width="contained" spacing="space-y-6">
 
         @if ($flash)
-            <div class="text-sm rounded-md p-3 {{ $flashType === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800' }}">{{ $flash }}</div>
+            <x-nx-callout :variant="$flashType === 'success' ? 'success' : 'danger'">{{ $flash }}</x-nx-callout>
         @endif
 
         <x-nx-card>
-            <div class="p-3 text-sm font-medium">Offen — {{ $pending->count() }}</div>
+            <div class="p-3 text-sm font-medium text-[color:var(--nx-text)]">Offen — {{ $pending->count() }}</div>
             @if ($pending->count())
                 <div class="divide-y divide-[color:var(--nx-line)]">
                     @foreach ($pending as $r)
@@ -28,35 +28,35 @@
                                         <span class="font-medium">{{ $r->device?->name ?? 'Gerät' }}</span>
                                         <span class="text-[color:var(--nx-faint)]">· {{ $r->measured_at?->format('d.m.Y H:i') ?? 'ohne Datum' }}</span>
                                     </div>
-                                    <div class="text-sm text-[color:var(--nx-muted)] mt-0.5">
+                                    <div class="text-sm text-[color:var(--nx-muted)] mt-1">
                                         @if ($r->matched_patient_id)
-                                            Zugeordnet: <span class="font-medium">{{ $r->patient_name ?? ('Patient #'.$r->matched_patient_id) }}</span>
+                                            <x-nx-badge variant="success" dot>{{ $r->patient_name ?? ('Patient #'.$r->matched_patient_id) }}</x-nx-badge>
                                         @else
-                                            <span class="text-amber-700">Nicht zugeordnet</span>
-                                            @if ($r->patient_number) <span class="font-mono text-xs">(Nr. {{ $r->patient_number }})</span> @endif
+                                            <x-nx-badge variant="warning" dot>Nicht zugeordnet</x-nx-badge>
+                                            @if ($r->patient_number) <span class="font-mono text-xs ml-1">Nr. {{ $r->patient_number }}</span> @endif
                                         @endif
                                     </div>
                                     <div class="mt-2 flex flex-wrap gap-1">
                                         @foreach (($r->parsed['components'] ?? []) as $c)
-                                            <span class="text-xs px-2 py-0.5 rounded-full bg-[var(--nx-bg-muted)] font-mono">
+                                            <x-nx-badge variant="neutral">
                                                 {{ $c['name'] ?? $c['test'] ?? '?' }}: {{ $c['value'] ?? '—' }}{{ isset($c['unit']) ? ' '.$c['unit'] : '' }}
-                                            </span>
+                                            </x-nx-badge>
                                         @endforeach
                                     </div>
                                     @if ($r->note)
-                                        <div class="text-xs text-red-600 mt-1">{{ $r->note }}</div>
+                                        <div class="text-xs text-[color:var(--nx-danger)] mt-2">{{ $r->note }}</div>
                                     @endif
                                 </div>
                                 <div class="flex flex-col items-end gap-2 shrink-0">
                                     @if ($r->matched_patient_id)
-                                        <button wire:click="confirm({{ $r->id }})" class="px-3 py-1.5 text-sm rounded-md bg-[var(--nx-accent,#0B6E5B)] text-white">Bestätigen & an Core</button>
+                                        <x-nx-button variant="primary" size="sm" wire:click="confirm({{ $r->id }})">Bestätigen &amp; an Core</x-nx-button>
                                     @else
-                                        <div class="flex items-center gap-1">
-                                            <input type="text" wire:model="manualNumber.{{ $r->id }}" placeholder="Patient-Nr." class="w-28 text-xs rounded-md border-[color:var(--nx-line)] bg-[var(--nx-bg)]" />
-                                            <button wire:click="assign({{ $r->id }})" class="px-2 py-1.5 text-xs rounded-md border border-[color:var(--nx-line)]">Zuordnen</button>
+                                        <div class="flex items-end gap-1">
+                                            <x-nx-input-text size="sm" placeholder="Patient-Nr." wire:model="manualNumber.{{ $r->id }}" class="w-28" />
+                                            <x-nx-button size="sm" wire:click="assign({{ $r->id }})">Zuordnen</x-nx-button>
                                         </div>
                                     @endif
-                                    <button wire:click="reject({{ $r->id }})" class="text-xs text-[color:var(--nx-faint)] hover:underline">verwerfen</button>
+                                    <x-nx-button variant="ghost" size="sm" wire:click="reject({{ $r->id }})">verwerfen</x-nx-button>
                                 </div>
                             </div>
                         </div>
@@ -69,7 +69,7 @@
 
         @if ($recent->count())
             <x-nx-card>
-                <div class="p-3 text-sm font-medium">Zuletzt</div>
+                <div class="p-3 text-sm font-medium text-[color:var(--nx-text)]">Zuletzt</div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
@@ -87,9 +87,9 @@
                                     <td class="px-3 py-2 text-[color:var(--nx-muted)] whitespace-nowrap">{{ $r->measured_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                     <td class="px-3 py-2">
                                         @if ($r->isForwarded())
-                                            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">an Core</span>
+                                            <x-nx-badge variant="success" dot>an Core</x-nx-badge>
                                         @else
-                                            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">verworfen</span>
+                                            <x-nx-badge variant="neutral">verworfen</x-nx-badge>
                                         @endif
                                     </td>
                                     <td class="px-3 py-2 font-mono text-xs text-[color:var(--nx-muted)]">{{ $r->observation_uuid ? \Illuminate\Support\Str::limit($r->observation_uuid, 13, '…') : '—' }}</td>
@@ -101,4 +101,19 @@
             </x-nx-card>
         @endif
     </x-ui-page-container>
+
+    <x-slot name="sidebar">
+        <x-ui-page-sidebar title="Übersicht" width="w-80" :defaultOpen="true">
+            <div class="p-6 space-y-6">
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-3">Der Eingang</h3>
+                    <div class="text-sm text-[color:var(--nx-muted)] space-y-2">
+                        <p>Eingegangene Messungen warten hier auf Zuordnung + Bestätigung.</p>
+                        <p><strong>Bestätigen &amp; an Core</strong> strippt die Identität und schiebt nur den Wert patient-owned in den sovra-Core.</p>
+                        <p>Kein Match? Patient-Nummer eintragen und zuordnen.</p>
+                    </div>
+                </div>
+            </div>
+        </x-ui-page-sidebar>
+    </x-slot>
 </x-ui-page>

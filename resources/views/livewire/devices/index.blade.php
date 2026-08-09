@@ -10,48 +10,29 @@
         ]" />
     </x-slot>
 
-    <x-ui-page-container width="full" spacing="space-y-6">
+    <x-ui-page-container width="contained" spacing="space-y-6">
 
         @if ($plainToken)
-            <x-nx-card>
-                <div class="p-4 space-y-2">
-                    <div class="text-sm font-medium text-emerald-700">Token für „{{ $plainTokenDevice }}" — jetzt kopieren, wird nur einmal angezeigt</div>
-                    <div class="font-mono text-sm bg-[var(--nx-bg-muted)] rounded-md p-3 break-all select-all">{{ $plainToken }}</div>
-                    <div class="text-xs text-[color:var(--nx-faint)]">Im Windows-Agent je Geräte-Ordner hinterlegen. Bei Verlust: neu ausstellen (rotieren).</div>
-                </div>
-            </x-nx-card>
+            <x-nx-callout variant="success" title="Token für „{{ $plainTokenDevice }}" — jetzt kopieren, wird nur einmal angezeigt">
+                <div class="font-mono text-sm bg-[color:var(--nx-hover)] rounded-md p-3 break-all select-all mt-1">{{ $plainToken }}</div>
+                <div class="text-xs text-[color:var(--nx-muted)] mt-2">Im Windows-Agent je Geräte-Ordner hinterlegen. Bei Verlust: neu ausstellen (rotieren).</div>
+            </x-nx-callout>
         @endif
 
         <x-nx-card>
-            <div class="p-4">
-                <div class="text-sm font-medium mb-3">Gerät anlegen</div>
+            <div class="p-4 space-y-4">
+                <div class="text-sm font-medium text-[color:var(--nx-text)]">Gerät anlegen</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-[color:var(--nx-muted)]">Name</label>
-                        <input type="text" wire:model="name" placeholder="Audiometer Raum 2" class="w-full text-sm rounded-md border-[color:var(--nx-line)] bg-[var(--nx-bg)]" />
-                        @error('name') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
-                    </div>
-                    <div>
-                        <label class="text-xs text-[color:var(--nx-muted)]">Gattung (kind)</label>
-                        <input type="text" wire:model="kind" placeholder="audiometry" class="w-full text-sm rounded-md border-[color:var(--nx-line)] bg-[var(--nx-bg)]" />
-                    </div>
-                    <div>
-                        <label class="text-xs text-[color:var(--nx-muted)]">Core-Definition (LOINC/Code)</label>
-                        <input type="text" wire:model="definition_code" placeholder="z.B. 28615-3" class="w-full text-sm rounded-md border-[color:var(--nx-line)] bg-[var(--nx-bg)]" />
-                    </div>
+                    <x-nx-input-text label="Name" placeholder="Audiometer Raum 2" wire:model="name" errorKey="name" required />
+                    <x-nx-input-text label="Gattung (kind)" placeholder="audiometry" wire:model="kind" errorKey="kind" />
+                    <x-nx-input-text label="Core-Definition (LOINC/Code)" placeholder="z.B. 28615-3" wire:model="definition_code" errorKey="definition_code" />
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs text-[color:var(--nx-muted)]">Hersteller</label>
-                            <input type="text" wire:model="manufacturer" class="w-full text-sm rounded-md border-[color:var(--nx-line)] bg-[var(--nx-bg)]" />
-                        </div>
-                        <div>
-                            <label class="text-xs text-[color:var(--nx-muted)]">Modell</label>
-                            <input type="text" wire:model="model" class="w-full text-sm rounded-md border-[color:var(--nx-line)] bg-[var(--nx-bg)]" />
-                        </div>
+                        <x-nx-input-text label="Hersteller" wire:model="manufacturer" />
+                        <x-nx-input-text label="Modell" wire:model="model" />
                     </div>
                 </div>
-                <div class="mt-3">
-                    <button wire:click="create" class="px-3 py-1.5 text-sm rounded-md bg-[var(--nx-accent,#0B6E5B)] text-white">Anlegen & Token ausstellen</button>
+                <div>
+                    <x-nx-button variant="primary" wire:click="create">Anlegen &amp; Token ausstellen</x-nx-button>
                 </div>
             </div>
         </x-nx-card>
@@ -85,11 +66,11 @@
                                     <td class="px-3 py-2 font-mono text-xs">{{ $d->token_prefix ? $d->token_prefix.'…' : '—' }}</td>
                                     <td class="px-3 py-2 text-xs text-[color:var(--nx-muted)] whitespace-nowrap">{{ $d->last_seen_at?->diffForHumans() ?? 'nie' }}</td>
                                     <td class="px-3 py-2">
-                                        <span class="text-xs px-2 py-0.5 rounded-full {{ $d->isActive() ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }}">{{ $d->isActive() ? 'aktiv' : 'deaktiviert' }}</span>
+                                        <x-nx-badge :variant="$d->isActive() ? 'success' : 'neutral'" dot>{{ $d->isActive() ? 'aktiv' : 'deaktiviert' }}</x-nx-badge>
                                     </td>
                                     <td class="px-3 py-2 text-right whitespace-nowrap">
-                                        <button wire:click="rotate({{ $d->id }})" class="text-xs text-[color:var(--nx-muted)] hover:underline">Token neu</button>
-                                        <button wire:click="toggle({{ $d->id }})" class="text-xs text-[color:var(--nx-muted)] hover:underline ml-2">{{ $d->isActive() ? 'deaktivieren' : 'aktivieren' }}</button>
+                                        <x-nx-button variant="ghost" size="sm" wire:click="rotate({{ $d->id }})">Token neu</x-nx-button>
+                                        <x-nx-button variant="ghost" size="sm" wire:click="toggle({{ $d->id }})">{{ $d->isActive() ? 'deaktivieren' : 'aktivieren' }}</x-nx-button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -101,4 +82,19 @@
             @endif
         </x-nx-card>
     </x-ui-page-container>
+
+    <x-slot name="sidebar">
+        <x-ui-page-sidebar title="Übersicht" width="w-80" :defaultOpen="true">
+            <div class="p-6 space-y-6">
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-3">Windows-Agent</h3>
+                    <div class="text-sm text-[color:var(--nx-muted)] space-y-2">
+                        <p>Je Geräte-Ordner einen Token hinterlegen. Der Agent postet die rohe GDT-Datei an:</p>
+                        <p class="font-mono text-xs bg-[color:var(--nx-hover)] rounded-md p-2 break-all">POST /api/medical-devices/ingest</p>
+                        <p>Bearer = der Geräte-Token. Parsen, Matchen und Strippen macht nodera.</p>
+                    </div>
+                </div>
+            </div>
+        </x-ui-page-sidebar>
+    </x-slot>
 </x-ui-page>
