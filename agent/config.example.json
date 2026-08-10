@@ -2,6 +2,7 @@
   "base_url": "https://nodera.sovra.health",
   "poll_seconds": 5,
   "stable_seconds": 3,
+  "archive_days": 90,
   "watches": [
     {
       "folder": "C:\\GDT\\Audiometer",

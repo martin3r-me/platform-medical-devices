@@ -20,12 +20,17 @@ macht **nodera** — der Agent bleibt bewusst dumm.
   "base_url": "https://nodera.sovra.health",
   "poll_seconds": 5,
   "stable_seconds": 3,
+  "archive_days": 90,
   "watches": [
     { "folder": "C:\\GDT\\Audiometer", "token": "mdev_…", "pattern": "*.gdt" },
     { "folder": "C:\\GDT\\Blutdruck",  "token": "mdev_…" }
   ]
 }
 ```
+
+`archive_days`: gesendete Dateien im `archiv/` werden nach so vielen Tagen automatisch
+gelöscht (beim Start + stündlich geprüft). `0` = nie löschen (Audit-Spur behalten).
+`failed/` wird nie automatisch geleert.
 
 Ein Token je Ordner — den bekommst du in nodera unter *Medizinische Messgeräte → Geräte*
 beim Anlegen/„Token neu". `pattern` ist optional (leer = alle Dateien).

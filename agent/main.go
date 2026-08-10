@@ -32,6 +32,7 @@ type Config struct {
 	BaseURL       string  `json:"base_url"`       // z.B. https://nodera.sovra.health
 	PollSeconds   int     `json:"poll_seconds"`   // Scan-Intervall (Default 5)
 	StableSeconds int     `json:"stable_seconds"` // Datei muss so lange unverändert sein (Default 3)
+	ArchiveDays   int     `json:"archive_days"`   // >0 = archiv/-Dateien älter als N Tage automatisch löschen; 0 = nie
 	Watches       []Watch `json:"watches"`
 }
 
@@ -72,7 +73,16 @@ func main() {
 		states[w.Folder] = map[string]fileState{}
 	}
 
+	var lastCleanup time.Time
 	for {
+		// Aufräumen: archiv/-Dateien älter als archive_days löschen (beim Start + stündlich).
+		if cfg.ArchiveDays > 0 && time.Since(lastCleanup) >= time.Hour {
+			for _, w := range cfg.Watches {
+				cleanupArchive(w.Folder, cfg.ArchiveDays)
+			}
+			lastCleanup = time.Now()
+		}
+
 		for _, w := range cfg.Watches {
 			scan(cfg, w, states[w.Folder], *once)
 		}
@@ -80,6 +90,32 @@ func main() {
 			return
 		}
 		time.Sleep(time.Duration(cfg.PollSeconds) * time.Second)
+	}
+}
+
+// cleanupArchive löscht Dateien im archiv/-Unterordner, die älter als days Tage sind.
+func cleanupArchive(folder string, days int) {
+	dir := filepath.Join(folder, "archiv")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return // kein archiv/ → nichts zu tun
+	}
+	cutoff := time.Now().Add(-time.Duration(days) * 24 * time.Hour)
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		if info.ModTime().Before(cutoff) {
+			if err := os.Remove(filepath.Join(dir, e.Name())); err != nil {
+				log.Printf("[archiv] löschen fehlgeschlagen %s: %v", e.Name(), err)
+			} else {
+				log.Printf("[archiv] gelöscht (älter als %d Tage): %s", days, e.Name())
+			}
+		}
 	}
 }
 
