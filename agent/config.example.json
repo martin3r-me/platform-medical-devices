@@ -1,0 +1,16 @@
+{
+  "base_url": "https://nodera.sovra.health",
+  "poll_seconds": 5,
+  "stable_seconds": 3,
+  "watches": [
+    {
+      "folder": "C:\\GDT\\Audiometer",
+      "token": "mdev_HIER_DER_GERAETE_TOKEN",
+      "pattern": "*.gdt"
+    },
+    {
+      "folder": "C:\\GDT\\Blutdruck",
+      "token": "mdev_HIER_DER_ANDERE_TOKEN"
+    }
+  ]
+}
