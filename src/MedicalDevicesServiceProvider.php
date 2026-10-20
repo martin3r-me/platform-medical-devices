@@ -4,7 +4,6 @@ namespace Platform\MedicalDevices;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Platform\Core\PlatformCore;
@@ -40,7 +39,7 @@ class MedicalDevicesServiceProvider extends ServiceProvider
         if (
             config()->has('medical-devices.routing') &&
             config()->has('medical-devices.navigation') &&
-            Schema::hasTable('modules')
+            PlatformCore::modulesTableExists()
         ) {
             PlatformCore::registerModule([
                 'key'        => 'medical-devices',
